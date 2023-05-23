@@ -236,3 +236,28 @@ test('pipeline destroy inner', function (t) {
     }
   })
 })
+
+test('pipeline w/ core streams', function (t) {
+  const coreStream = require('stream')
+
+  const c = Composer.pipeline(new Transform(), new Transform())
+
+  let reads = 0
+
+  const data = []
+  for (let i = 0; i < 20; i++) {
+    data.push({ msg: 'hello-' + i })
+  }
+
+  c.on('finish', function () {
+    t.pass('finish')
+  })
+
+  coreStream.pipeline([coreStream.Readable.from(data), c], function () {
+    t.end()
+  })
+
+  c.on('data', function (data) {
+    t.alike(data, { msg: 'hello-' + reads++ })
+  })
+})
