@@ -238,7 +238,7 @@ test('pipeline destroy inner', function (t) {
 })
 
 test('pipeline w/ core streams', function (t) {
-  t.plan(22)
+  t.plan(23)
 
   const coreStream = require('stream')
 
@@ -255,11 +255,15 @@ test('pipeline w/ core streams', function (t) {
     t.pass('finish')
   })
 
+  c.on('end', function () {
+    t.pass('end')
+  })
+
   coreStream.pipeline([coreStream.Readable.from(data), c], function (err) {
     t.ok(!err, 'pipeline ended')
   })
 
   c.on('data', function (data) {
-    t.alike(data, { msg: 'hello-' + reads++ })
+    t.alike(data, { msg: 'hello-' + reads++ }, 'got data')
   })
 })
