@@ -238,6 +238,8 @@ test('pipeline destroy inner', function (t) {
 })
 
 test('pipeline w/ core streams', function (t) {
+  t.plan(22)
+
   const coreStream = require('stream')
 
   const c = Composer.pipeline(new Transform(), new Transform())
@@ -253,8 +255,8 @@ test('pipeline w/ core streams', function (t) {
     t.pass('finish')
   })
 
-  coreStream.pipeline([coreStream.Readable.from(data), c], function () {
-    t.end()
+  coreStream.pipeline([coreStream.Readable.from(data), c], function (err) {
+    t.ok(!err, 'pipeline ended')
   })
 
   c.on('data', function (data) {
