@@ -1,4 +1,4 @@
-const { Duplex, pipeline } = require('streamx')
+const { Duplex, pipeline, isStreamx } = require('streamx')
 
 module.exports = class Composer extends Duplex {
   constructor (opts) {
@@ -6,6 +6,8 @@ module.exports = class Composer extends Duplex {
 
     this._writable = null
     this._readable = null
+    this._isPipeline = false
+    this._pipelineMissing = 2
 
     this._writeCallback = null
     this._finalCallback = null
@@ -13,7 +15,7 @@ module.exports = class Composer extends Duplex {
     this._ondata = this._pushData.bind(this)
     this._onend = this._pushEnd.bind(this, null)
     this._ondrain = this._continueWrite.bind(this, null)
-    this._onfinish = this._continueFinal.bind(this, null)
+    this._onfinish = this._maybeFinal.bind(this)
     this._onerror = this.destroy.bind(this)
     this._onclose = this.destroy.bind(this, null)
   }
@@ -34,6 +36,7 @@ module.exports = class Composer extends Duplex {
   setPipeline (first, ...streams) {
     const all = Array.isArray(first) ? first : [first, ...streams]
 
+    this._isPipeline = true
     this.setWritable(all[0])
     this.setReadable(all[all.length - 1])
 
@@ -115,18 +118,30 @@ module.exports = class Composer extends Duplex {
   }
 
   _pushEnd () {
+    if (this._isPipeline) {
+      this.on('end', this._decrementPipeline.bind(this))
+    }
     this.push(null)
     if (this._readable !== null) {
       this._readable.removeListener('close', this._onclose)
     }
   }
 
-  _continueFinal (err) {
-    if (this._finalCallback === null) return
+  _decrementPipeline () {
+    if (--this._pipelineMissing === 0) this._continueFinal(null)
+  }
 
+  _maybeFinal () {
     if (this._writable !== null) {
       this._writable.removeListener('close', this._onclose)
     }
+
+    if (this._isPipeline) this._decrementPipeline()
+    else this._continueFinal(null)
+  }
+
+  _continueFinal (err) {
+    if (this._finalCallback === null) return
 
     const cb = this._finalCallback
     this._finalCallback = null
