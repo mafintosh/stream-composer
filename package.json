@@ -1,6 +1,6 @@
 {
   "name": "stream-composer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Modern stream composer",
   "main": "index.js",
   "dependencies": {
