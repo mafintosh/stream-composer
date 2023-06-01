@@ -238,7 +238,7 @@ test('pipeline destroy inner', function (t) {
 })
 
 test('pipeline w/ core streams', function (t) {
-  t.plan(23)
+  t.plan(24)
 
   const coreStream = require('stream')
 
@@ -273,6 +273,7 @@ test('pipeline w/ core streams', function (t) {
 
   coreStream.pipeline([coreStream.Readable.from(data), c], function (err) {
     t.ok(!err, 'pipeline ended')
+    t.ok(reads === 20, 'got all data before pipeline ended')
   })
 
   c.on('data', function (data) {
