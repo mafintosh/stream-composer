@@ -242,8 +242,19 @@ test('pipeline w/ core streams', function (t) {
 
   const coreStream = require('stream')
 
-  const c = Composer.pipeline(new Transform(), new Transform())
-
+  const c = Composer.pipeline(new Transform({
+     transform (obj, cb) {
+       setImmediate(function () {
+         cb(null, obj)
+       })
+     }
+   }), new Transform({
+     transform (obj, cb) {
+       setImmediate(function () {
+         cb(null, obj)
+       })
+     }
+   }))
   let reads = 0
 
   const data = []
@@ -252,14 +263,17 @@ test('pipeline w/ core streams', function (t) {
   }
 
   c.on('finish', function () {
-    t.pass('finish')
+    t.absent(pipelineEnded, 'finish')
   })
 
   c.on('end', function () {
-    t.pass('end')
+    t.absent(pipelineEnded, 'ended')
   })
 
+  let pipelineEnded = false
+
   coreStream.pipeline([coreStream.Readable.from(data), c], function (err) {
+    pipelineEnded = true
     t.ok(!err, 'pipeline ended')
   })
 
