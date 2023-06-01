@@ -1,4 +1,4 @@
-const { Duplex, pipeline, isStreamx } = require('streamx')
+const { Duplex, pipeline } = require('streamx')
 
 module.exports = class Composer extends Duplex {
   constructor (opts) {

@@ -243,18 +243,18 @@ test('pipeline w/ core streams', function (t) {
   const coreStream = require('stream')
 
   const c = Composer.pipeline(new Transform({
-     transform (obj, cb) {
-       setImmediate(function () {
-         cb(null, obj)
-       })
-     }
-   }), new Transform({
-     transform (obj, cb) {
-       setImmediate(function () {
-         cb(null, obj)
-       })
-     }
-   }))
+    transform (obj, cb) {
+      setImmediate(function () {
+        cb(null, obj)
+      })
+    }
+  }), new Transform({
+    transform (obj, cb) {
+      setImmediate(function () {
+        cb(null, obj)
+      })
+    }
+  }))
   let reads = 0
 
   const data = []
