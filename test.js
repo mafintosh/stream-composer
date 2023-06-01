@@ -242,7 +242,19 @@ test('pipeline w/ core streams', function (t) {
 
   const coreStream = require('stream')
 
-  const c = Composer.pipeline(new Transform(), new Transform())
+  const c = Composer.pipeline(new Transform({
+    transform (obj, cb) {
+      setTimeout(function () {
+        cb(null, obj)
+      }, 250)
+    }
+  }), new Transform({
+    transform (obj, cb) {
+      setTimeout(function () {
+        cb(null, obj)
+      }, 500)
+    }
+  }))
 
   let reads = 0
 
